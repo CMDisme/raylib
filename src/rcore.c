@@ -1599,9 +1599,9 @@ void SetTargetFPS(int fps)
 
 // Get current FPS
 // NOTE: We calculate an average framerate
-float GetFPS(void)
+int GetFPS(void)
 {
-    float fps = 0;
+    int fps = 0;
 
 #if !defined(SUPPORT_CUSTOM_FRAME_CONTROL)
     #define FPS_CAPTURE_FRAMES_COUNT    30      // 30 captures
@@ -1634,7 +1634,7 @@ float GetFPS(void)
         average += history[index];
     }
 
-    fps = (1.0f/average);
+    fps = (int)roundf(1.0f/average);
 #endif
 
     return fps;
@@ -1654,7 +1654,6 @@ float GetFrameTime(void)
 //void SwapScreenBuffer(void);
 //void PollInputEvents(void);
 
-bool good = true;
 // Wait for some time (stop program execution)
 // NOTE: Sleep() granularity could be around 10 ms, it means, Sleep() could
 // take longer than expected... for that reason we use the busy wait loop
@@ -1698,8 +1697,6 @@ void WaitTime(double seconds)
     #if defined(__APPLE__)
         usleep(sleepSeconds*1000000.0);
     #endif
-
-    good = ((GetTime() <= destinationTime));
 
     #if defined(SUPPORT_PARTIALBUSY_WAIT_LOOP)
         while (GetTime() < destinationTime) { }

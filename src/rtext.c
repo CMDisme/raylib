@@ -1113,25 +1113,16 @@ bool ExportFontAsCode(Font font, const char *fileName)
 }
 
 // Draw current FPS
-float maxFt = 0;
-int wait_ft = 120;
-extern bool good;
 // NOTE: Uses default font
 void DrawFPS(int posX, int posY)
 {
     Color color = LIME;                         // Good FPS
+    int fps = GetFPS();
 
-    float ft = GetFrameTime();
-    DrawText(TextFormat("%2f ms", ft), posX, posY+20, 20, color);
-    DrawText(TextFormat("%2f ms", maxFt), posX, posY+40, 20, color);
-    wait_ft -= 1;
-    if (maxFt < ft || wait_ft < 0) {
-        maxFt = ft;
-        wait_ft = 120;
-    } 
+    if ((fps < 30) && (fps >= 15)) color = ORANGE;  // Warning FPS
+    else if (fps < 15) color = RED;             // Low FPS
 
-    float fps = GetFPS();
-    DrawText(TextFormat("%2f FPS", fps), posX, posY, 20, color);
+    DrawText(TextFormat("%2i FPS", fps), posX, posY, 20, color);
 }
 
 // Draw text (using default font)

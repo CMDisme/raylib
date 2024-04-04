@@ -1063,7 +1063,7 @@ RLAPI Matrix GetCameraMatrix2D(Camera2D camera);                        // Get c
 RLAPI void SetTargetFPS(int fps);                                 // Set target FPS (maximum)
 RLAPI float GetFrameTime(void);                                   // Get time in seconds for last frame drawn (delta time)
 RLAPI double GetTime(void);                                       // Get elapsed time in seconds since InitWindow()
-RLAPI float GetFPS(void);                                           // Get current FPS
+RLAPI int GetFPS(void);                                           // Get current FPS
 
 // Custom frame control functions
 // NOTE: Those functions are intended for advance users that want full control over the frame processing
