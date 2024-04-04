@@ -1634,7 +1634,7 @@ float GetFPS(void)
         average += history[index];
     }
 
-    fps = roundf(1.0f/average);
+    fps = (1.0f/average);
 #endif
 
     return fps;
