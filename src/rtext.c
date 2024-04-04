@@ -1131,7 +1131,7 @@ void DrawFPS(int posX, int posY)
     } 
 
     float fps = GetFPS();
-    DrawText(TextFormat("%2i FPS", fps), posX, posY, 20, color);
+    DrawText(TextFormat("%2f FPS", fps), posX, posY, 20, color);
 }
 
 // Draw text (using default font)
