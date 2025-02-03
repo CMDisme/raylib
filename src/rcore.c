@@ -317,6 +317,10 @@ typedef struct CoreData {
 
             char currentButtonState[MAX_MOUSE_BUTTONS];     // Registers current mouse button state
             char previousButtonState[MAX_MOUSE_BUTTONS];    // Registers previous mouse button state
+
+            int buttonPressedQueue[MAX_KEY_PRESSED_QUEUE];     // Input keys queue
+            int buttonPressedQueueCount;       // Input keys queue count
+
             Vector2 currentWheelMove;       // Registers current mouse wheel variation
             Vector2 previousWheelMove;      // Registers previous mouse wheel variation
 
@@ -2626,10 +2630,23 @@ void PlayAutomationEvent(AutomationEvent event)
                         CORE.Input.Keyboard.keyPressedQueue[CORE.Input.Keyboard.keyPressedQueueCount] = event.params[0];
                         CORE.Input.Keyboard.keyPressedQueueCount++;
                     }
+                } break;
+            } 
+            case INPUT_MOUSE_BUTTON_UP: CORE.Input.Mouse.currentButtonState[event.params[0]] = false; break;    // param[0]: key
+            case INPUT_MOUSE_BUTTON_DOWN: {
+                CORE.Input.Mouse.currentButtonState[event.params[0]] = true;   // param[0]: key
+
+                if (CORE.Input.Mouse.previousButtonState[event.params[0]] == false)
+                {
+                    TRACELOG(LOG_WARNING, "Mouse %i Pressed!", event.params[0]);
+                    if (CORE.Input.Mouse.buttonPressedQueueCount < MAX_KEY_PRESSED_QUEUE)
+                    {
+                        // Add character to the queue
+                        CORE.Input.Mouse.buttonPressedQueue[CORE.Input.Mouse.buttonPressedQueueCount] = event.params[0];
+                        CORE.Input.Mouse.buttonPressedQueueCount++;
+                    }
                 }
             } break;
-            case INPUT_MOUSE_BUTTON_UP: CORE.Input.Mouse.currentButtonState[event.params[0]] = false; break;    // param[0]: key
-            case INPUT_MOUSE_BUTTON_DOWN: CORE.Input.Mouse.currentButtonState[event.params[0]] = true; break;   // param[0]: key
             case INPUT_MOUSE_POSITION:      // param[0]: x, param[1]: y
             {
                 CORE.Input.Mouse.currentPosition.x = (float)event.params[0];
@@ -2767,7 +2784,18 @@ int GetKeyPressed(void)
         CORE.Input.Keyboard.keyPressedQueue[CORE.Input.Keyboard.keyPressedQueueCount - 1] = 0;
         CORE.Input.Keyboard.keyPressedQueueCount--;
     }
+    else if (CORE.Input.Mouse.buttonPressedQueueCount > 0)
+    {
+        value = 400 + CORE.Input.Mouse.buttonPressedQueue[0];
+        
+        // Shift elements 1 step toward the head
+        for (int i = 0; i < (CORE.Input.Mouse.buttonPressedQueueCount - 1); i++)
+            CORE.Input.Mouse.buttonPressedQueue[i] = CORE.Input.Mouse.buttonPressedQueue[i + 1];
 
+        // Reset last character in the queue
+        CORE.Input.Mouse.buttonPressedQueue[CORE.Input.Mouse.buttonPressedQueueCount - 1] = 0;
+        CORE.Input.Mouse.buttonPressedQueueCount--;
+    }
     return value;
 }
 

@@ -1083,6 +1083,7 @@ void PollInputEvents(void)
 
     // Reset keys/chars pressed registered
     CORE.Input.Keyboard.keyPressedQueueCount = 0;
+    CORE.Input.Mouse.buttonPressedQueueCount = 0;
     CORE.Input.Keyboard.charPressedQueueCount = 0;
 
     // Reset last gamepad button/axis registered state
@@ -1099,7 +1100,9 @@ void PollInputEvents(void)
     }
 
     // Register previous mouse states
-    for (int i = 0; i < MAX_MOUSE_BUTTONS; i++) CORE.Input.Mouse.previousButtonState[i] = CORE.Input.Mouse.currentButtonState[i];
+    for (int i = 0; i < MAX_MOUSE_BUTTONS; i++) {
+        CORE.Input.Mouse.previousButtonState[i] = CORE.Input.Mouse.currentButtonState[i];
+    }
 
     // Register previous mouse wheel state
     CORE.Input.Mouse.previousWheelMove = CORE.Input.Mouse.currentWheelMove;
@@ -1731,13 +1734,25 @@ static void CharCallback(GLFWwindow *window, unsigned int codepoint)
         CORE.Input.Keyboard.charPressedQueueCount++;
     }
 }
+#include <stdio.h>
 
 // GLFW3 Mouse Button Callback, runs on mouse button pressed
 static void MouseButtonCallback(GLFWwindow *window, int button, int action, int mods)
 {
     // WARNING: GLFW could only return GLFW_PRESS (1) or GLFW_RELEASE (0) for now,
     // but future releases may add more actions (i.e. GLFW_REPEAT)
-    CORE.Input.Mouse.currentButtonState[button] = action;
+    printf("HI! %i %i\n", button, action);
+    if (action == GLFW_RELEASE) CORE.Input.Mouse.currentButtonState[button] = 0;
+    else if(action == GLFW_PRESS) CORE.Input.Mouse.currentButtonState[button] = 1;
+    // else if(action == GLFW_REPEAT) CORE.Input.Keyboard.keyRepeatInFrame[key] = 1;
+    if ((CORE.Input.Mouse.buttonPressedQueueCount < MAX_KEY_PRESSED_QUEUE) && (action == GLFW_PRESS))
+    {
+        // Add character to the queue
+        CORE.Input.Mouse.buttonPressedQueue[CORE.Input.Mouse.buttonPressedQueueCount] = button;
+        CORE.Input.Mouse.buttonPressedQueueCount++;
+    }
+
+    // CORE.Input.Mouse.currentButtonState[button] = action;
     CORE.Input.Touch.currentTouchState[button] = action;
 
 #if defined(SUPPORT_GESTURES_SYSTEM) && defined(SUPPORT_MOUSE_GESTURES)
