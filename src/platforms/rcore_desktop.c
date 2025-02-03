@@ -1107,6 +1107,8 @@ void PollInputEvents(void)
     // Register previous mouse wheel state
     CORE.Input.Mouse.previousWheelMove = CORE.Input.Mouse.currentWheelMove;
     CORE.Input.Mouse.currentWheelMove = (Vector2){ 0.0f, 0.0f };
+    CORE.Input.Mouse.currentButtonState[8] = 0;
+    CORE.Input.Mouse.currentButtonState[9] = 0;
 
     // Register previous mouse position
     CORE.Input.Mouse.previousPosition = CORE.Input.Mouse.currentPosition;
@@ -1741,7 +1743,6 @@ static void MouseButtonCallback(GLFWwindow *window, int button, int action, int 
 {
     // WARNING: GLFW could only return GLFW_PRESS (1) or GLFW_RELEASE (0) for now,
     // but future releases may add more actions (i.e. GLFW_REPEAT)
-    printf("HI! %i %i\n", button, action);
     if (action == GLFW_RELEASE) CORE.Input.Mouse.currentButtonState[button] = 0;
     else if(action == GLFW_PRESS) CORE.Input.Mouse.currentButtonState[button] = 1;
     // else if(action == GLFW_REPEAT) CORE.Input.Keyboard.keyRepeatInFrame[key] = 1;
@@ -1817,6 +1818,27 @@ static void MouseCursorPosCallback(GLFWwindow *window, double x, double y)
 // GLFW3 Scrolling Callback, runs on mouse wheel
 static void MouseScrollCallback(GLFWwindow *window, double xoffset, double yoffset)
 {
+    if (CORE.Input.Mouse.currentButtonState[8] == 0 && CORE.Input.Mouse.currentButtonState[9] == 0)
+    {
+        if (yoffset == 0){
+            CORE.Input.Mouse.currentButtonState[8] = 0;
+            CORE.Input.Mouse.currentButtonState[9] = 0;
+        } else if (yoffset > 0) {
+            CORE.Input.Mouse.currentButtonState[8] = 0;
+            CORE.Input.Mouse.currentButtonState[9] = 1;
+        } else {
+            CORE.Input.Mouse.currentButtonState[8] = 1;
+            CORE.Input.Mouse.currentButtonState[9] = 0;
+        }
+        // else if(action == GLFW_REPEAT) CORE.Input.Keyboard.keyRepeatInFrame[key] = 1;
+        if ((CORE.Input.Mouse.buttonPressedQueueCount < MAX_KEY_PRESSED_QUEUE) && (yoffset != 0))
+        {
+            // Add character to the queue
+            CORE.Input.Mouse.buttonPressedQueue[CORE.Input.Mouse.buttonPressedQueueCount] = 8 + (yoffset > 0);
+            CORE.Input.Mouse.buttonPressedQueueCount++;
+        }
+
+    }
     CORE.Input.Mouse.currentWheelMove = (Vector2){ (float)xoffset, (float)yoffset };
 }
 
